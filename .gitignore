@@ -36,3 +36,6 @@ build/
 /brand-logos/
 /category-images/
 /product-images/
+
+.metadata
+.settings
