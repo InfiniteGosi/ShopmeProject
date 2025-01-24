@@ -20,6 +20,8 @@ import com.shopme.admin.FileUploadUtil;
 import com.shopme.common.entity.Role;
 import com.shopme.common.entity.User;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Controller
 public class UserController {
 	@Autowired
@@ -31,27 +33,27 @@ public class UserController {
 	}
 	
 	@GetMapping("/users/page/{pageNum}")
-	public String listByPage(@PathVariable(name = "pageNum") int pageNum, Model model, 
-			@Param("sortField") String sortField, 
+	public String listByPage(@PathVariable(name = "pageNum") // Captures the page number from the URL (e.g., /users/page/2 means pageNum = 2).
+			int pageNum, 
+			Model model, 
+			@Param("sortField") String sortField, // The field to sort by (e.g., firstName, email). This value is optional and can come from query parameters (e.g., ?sortField=firstName).
 			@Param("sortDir") String sortDir,
 			@Param("keyword") String keyword) {
-		System.out.println("Sort field: " + sortField);
-		System.out.println("Sort dir: " + sortDir);
-		
 		Page<User> page = userService.listByPage(pageNum, sortField, sortDir, keyword);
-		List<User> listUser = page.getContent();
+		List<User> listUser = page.getContent(); // Extracts the user list for the current page
 		
-		// If pageNum = 1 --> startCount = (1 - 1) * 4 + 1 = 1
-		//					  endCount = 1 + 4 - 1 = 4
+		// If pageNum = 1 --> startCount = (1 - 1) * 4 + 1 = 1 (The first item on the current page.)
+		//					  endCount = 1 + 4 - 1 = 4 (The last item on the current page.)
 		// So we show the item 1 to 4 in the first page
 		long startCount = (pageNum - 1) * UserService.USERS_PER_PAGE + 1;
 		long endCount = startCount + UserService.USERS_PER_PAGE - 1;
 		
-		// Limit the end item to the page size
+		// Ensures endCount doesn’t exceed the total number of users in the database.
 		if (endCount > page.getTotalElements()) {
 			endCount = page.getTotalElements();
 		}
 		
+		// This is used to toggle sorting when the user clicks a column header in the view.
 		String reverseSortDir = sortDir.equals("asc") ? "desc" : "asc";
 		
 		model.addAttribute("totalPages", page.getTotalPages());
@@ -82,25 +84,31 @@ public class UserController {
 	}
 	
 	@PostMapping("/users/save")
-	public String saveUser(User user, RedirectAttributes redirectAttributes,
-			@RequestParam("image") MultipartFile multipartFile) throws IOException {
-		// If the admin added a photo for a user
+	public String saveUser(User user, 
+			RedirectAttributes redirectAttributes, // Used to pass a flash message (temporary feedback) to the redirected page after the user is saved.
+			// Captures the uploaded profile photo as a file. MultipartFile allows reading the file's content.
+			@RequestParam("image") MultipartFile multipartFile ) throws IOException {
+		// Ensures that the user uploaded a photo.
 		if (!multipartFile.isEmpty()) {
-			String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+			// Extracts the original file name and cleans it with to remove invalid characters.
+			String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename()); 
 			user.setPhoto(fileName);
 			User savedUser = userService.save(user);
 			
 			String uploadDir = "user-photos/" + savedUser.getId();
+			// Removes any existing files in the directory. This ensures only the new photo is stored.
 			FileUploadUtil.cleanDir(uploadDir);
+			// Save the uploaded photo to the server.
 			FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
 		}
-		else { // If not the case of adding a photo
+		else { // If no photo was uploaded
+			// If the photo field is empty, it sets photo to null (indicating no photo is stored)
 			if (user.getPhoto().isEmpty()) {
 				user.setPhoto(null);
 			}
 			userService.save(user);
 		}
-		
+		// Adds a flash message to indicate success. Flash attributes are temporary and will be displayed on the redirected page.
 		redirectAttributes.addFlashAttribute("message", "The user has been saved successfully!");
 		
 		return getRedirectURLtoAffectedUser(user);
@@ -159,5 +167,10 @@ public class UserController {
 		return "redirect:/users";
 	}
 	
-	
+	@GetMapping("/users/export/csv")
+	public void exportToCsv(HttpServletResponse response) throws IOException {
+		List<User> listUser = userService.listAll();
+		UserCsvExporter exporter = new UserCsvExporter();
+		exporter.export(listUser, response);
+	}
 }

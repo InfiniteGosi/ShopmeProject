@@ -16,7 +16,6 @@ public class WebSecurityConfig {
 	
 	@Bean
 	SecurityFilterChain configureHttpSecurity(HttpSecurity http) throws Exception {
-		
 		http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 		
 		return http.build();

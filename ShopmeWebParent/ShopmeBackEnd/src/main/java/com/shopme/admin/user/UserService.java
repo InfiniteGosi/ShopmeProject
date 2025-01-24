@@ -31,7 +31,7 @@ public class UserService {
 	private PasswordEncoder passwordEncoder;
 	
 	public List<User> listAll() {
-		return (List<User>) userRepository.findAll();
+		return (List<User>) userRepository.findAll(Sort.by("firstName").ascending());
 	}
 	
 	public Page<User> listByPage(int pageNumber, String sortField, String sortDir, String keyword) {
@@ -55,16 +55,16 @@ public class UserService {
 		boolean isUpdating = (user.getId() != null);
 		
 		if (isUpdating) {
-			User existingUser = userRepository.findById(user.getId()).get();
+			User existingUser = userRepository.findById(user.getId()).get(); // Fetches the existing user by ID.
 			
-			if (user.getPassword().isEmpty()) {
-				user.setPassword(existingUser.getPassword());
+			if (user.getPassword().isEmpty()) { 
+				user.setPassword(existingUser.getPassword()); // Retains the old password if the new password is empty.
 			}
-			else {
-				encodePassword(user);
+			else { 
+				encodePassword(user); // Encrypts the password if a new one is provided.
 			}
 		}
-		else {
+		else { // If creating a new user
 			encodePassword(user);
 		}
 		
@@ -79,18 +79,19 @@ public class UserService {
 	public boolean isUniqueEmail(Integer id, String email) {
 		User userByEmail = userRepository.getUserByEmail(email);
 		
+		// If no user exists with the given email, it's unique.
 		if (userByEmail == null) {
 			return true;
 		}
 		
 		boolean isCreatingNew = (id == null);
 		
-		if (isCreatingNew) {
+		if (isCreatingNew) { // If creating a new user, the email must not already exist.
 			if (userByEmail != null) {
 				return false;
 			}
 		}
-		else {
+		else { // If updating, the email is unique if it belongs to the same user (id matches).
 			if (userByEmail.getId() != id) {
 				return false;
 			}

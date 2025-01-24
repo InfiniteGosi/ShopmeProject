@@ -5,6 +5,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+// In this case we only check if the user email is unique, therefore we use @RestController
+// to return data as JSON. While @Controller returns web pages
+
 @RestController
 public class UserRestController {
 	@Autowired

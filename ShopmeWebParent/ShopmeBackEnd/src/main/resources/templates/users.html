@@ -62,7 +62,9 @@
 	</div>
 	<div>
 		<h2>Manage users</h2>
-		<a th:href="@{users/new}">Create new users</a>
+		<a th:href="@{/users/new}">Create new users</a>
+		&nbsp;|&nbsp;
+		<a th:href="@{/users/export/csv}">Export to CSV</a>
 	</div>
 	
 	<div th:if="${message != null}" class="alert alert-success text-center">
@@ -265,7 +267,6 @@
 		$(".link-delete").on("click", function(e) {
 			e.preventDefault();
 			link = $(this);
-			//alert($(this).attr("href"));
 			userId = link.attr("userId");
 			$("#yesButton").attr("href", link.attr("href"));
 			$("#confirmText").text("Are you sure you want to delete this user ID " + userId + "?");
