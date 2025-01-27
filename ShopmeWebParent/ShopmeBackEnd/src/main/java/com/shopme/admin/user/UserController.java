@@ -33,7 +33,8 @@ public class UserController {
 	}
 	
 	@GetMapping("/users/page/{pageNum}")
-	public String listByPage(@PathVariable(name = "pageNum") // Captures the page number from the URL (e.g., /users/page/2 means pageNum = 2).
+	public String listByPage(
+			@PathVariable(name = "pageNum") // Captures the page number from the URL (e.g., /users/page/2 means pageNum = 2).
 			int pageNum, 
 			Model model, 
 			@Param("sortField") String sortField, // The field to sort by (e.g., firstName, email). This value is optional and can come from query parameters (e.g., ?sortField=firstName).
@@ -121,7 +122,8 @@ public class UserController {
 	
 	
 	@GetMapping("/users/edit/{id}")
-	public String editUser(@PathVariable(name = "id") Integer id, 
+	public String editUser(
+			@PathVariable(name = "id") Integer id, 
 			Model model,
 			RedirectAttributes redirectAttributes) {
 		try {
