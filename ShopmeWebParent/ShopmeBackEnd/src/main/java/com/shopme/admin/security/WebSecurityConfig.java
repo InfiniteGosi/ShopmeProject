@@ -14,42 +14,46 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
+
 	@Bean
 	UserDetailsService userDetailsService() {
 		return new ShopmeUserDetailsService();
 	}
-	
+
 	@Bean
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Bean
 	DaoAuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 		authProvider.setUserDetailsService(userDetailsService());
 		authProvider.setPasswordEncoder(passwordEncoder());
+
 		return authProvider;
 	}
-	
+
 	@Bean
-	SecurityFilterChain configureHttpSecurity(HttpSecurity http) throws Exception {
+	SecurityFilterChain configureHttp(HttpSecurity http) throws Exception {
 		http.authenticationProvider(authenticationProvider());
-		
+
 		http.authorizeHttpRequests(auth -> auth
-					.anyRequest().authenticated()
-				)
-				.formLogin(form -> form
-					.loginPage("/login")
-					.usernameParameter("email")
-					.permitAll()
-				);
-		
-		return http.build();
+				.anyRequest().authenticated()
+			)
+			.formLogin(form -> form
+				.loginPage("/login")
+				.usernameParameter("email")
+				.permitAll())
+
+			.logout(logout -> logout.permitAll());
+
+			return http.build();
 	}
-	
+
 	@Bean
 	WebSecurityCustomizer configureWebSecurity() throws Exception {
 		return (web) -> web.ignoring().requestMatchers("/images/**", "/js/**", "/webjars/**");
 	}
+
 }
