@@ -39,6 +39,7 @@ public class WebSecurityConfig {
 		http.authenticationProvider(authenticationProvider());
 
 		http.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/users/**").hasAuthority("Admin")
 				.anyRequest().authenticated()
 			)
 			.formLogin(form -> form
@@ -47,9 +48,10 @@ public class WebSecurityConfig {
 				.permitAll())
 
 			.logout(logout -> logout.permitAll())
+
 			.rememberMe(rem -> rem
-				.key("AbcDefgHijKlmnOpqrs_1234567890")
-				.tokenValiditySeconds(7 * 24 * 60 * 60));
+					.key("AbcDefgHijKlmnOpqrs_1234567890")
+					.tokenValiditySeconds(7 * 24 * 60 * 60));
 
 			return http.build();
 	}
