@@ -7,10 +7,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 
 public class FileUploadUtil {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileUploadUtil.class);
+	
 	// Saves a file (uploaded by a user) to a specified directory.
 	public static void saveFile(String uploadDir, // The directory where the file will be saved.
 			String fileName, // The name of the file to save.
@@ -49,13 +53,15 @@ public class FileUploadUtil {
 						Files.delete(file);
 					}
 					catch (IOException ex) {
-						System.out.println("Could not delete file: " + file);
+						LOGGER.error("Could not delete file: " + file);
+						//System.out.println("Could not delete file: " + file);
 					}
 				}
 			});
 		}
 		catch (IOException ex) {
-			System.out.println("Could not list directory: " + dirPath);
+			LOGGER.error("Could not list directory: " + dirPath);
+			//System.out.println("Could not list directory: " + dirPath);
 		}
 	}
 }
